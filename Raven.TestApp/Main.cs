@@ -12,18 +12,14 @@ namespace Raven.TestApp
 			Console.WriteLine ("Hello World!");
 			using(var documentStore = new DocumentStore(){Url = "http://localhost:8080"})
 			{
-				Console.WriteLine("documentStore constructed");
 				documentStore.Initialize();
-				Console.WriteLine("documentStore initialized");
 				using(DocumentSession documentSession = (DocumentSession)documentStore.OpenSession())
 				{
-					Console.WriteLine("documentSession opened");
 					documentSession.Store(new Item{Name = "RavenDB Test1", Description = "NoSQL Document Store1"});
 					documentSession.Store(new Item{Name = "RavenDB Test2", Description = "NoSQL Document Store2"});
 					documentSession.Store(new Item2{ x = 1, y = 2});
 					documentSession.Store(new Item2{ x = 3, y = 4});
 					documentSession.SaveChanges();
-					Console.WriteLine("documentSession saved");
 				}
 				
 				using(var documentSession = documentStore.OpenSession())
@@ -34,6 +30,11 @@ namespace Raven.TestApp
 					Item2 item22 = documentSession.Load<Item2>("item2s/2");
 					Console.WriteLine("{0}\n{1}\n",item1,item2);
 					Console.WriteLine("{0}\n{1}\n",item21,item22);
+					
+					var itemResult = documentSession.Query<Item>()
+						.Where(item => item.Name == "RavenDB Test2")
+							.First();
+					Console.WriteLine("{0}",itemResult);
 				}
 			}			
 		}
