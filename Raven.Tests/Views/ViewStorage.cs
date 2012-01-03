@@ -12,7 +12,7 @@ using Raven.Database.Config;
 using Raven.Database.Impl;
 using Raven.Database.Indexing;
 using Raven.Database.Storage;
-using Raven.Storage.Esent;
+using Raven.Storage.Managed;
 using Raven.Tests.Storage;
 using Xunit;
 
@@ -26,7 +26,7 @@ namespace Raven.Tests.Views
 		{
 			transactionalStorage = new TransactionalStorage(new RavenConfiguration
 			{
-				DataDirectory = "raven.db.test.esent",
+				DataDirectory = "raven.db.test.munin",
 				RunInUnreliableYetFastModeThatIsNotSuitableForProduction = true
 			}, () => { });
 			transactionalStorage.Initialize(new DummyUuidGenerator());

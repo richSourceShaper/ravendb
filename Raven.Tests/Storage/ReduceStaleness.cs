@@ -5,7 +5,7 @@ using Raven.Database.Impl;
 using Raven.Database.Indexing;
 using Raven.Database.Storage;
 using Raven.Json.Linq;
-using EsentTransactionalStorage = Raven.Storage.Esent.TransactionalStorage;
+//using EsentTransactionalStorage = Raven.Storage.Esent.TransactionalStorage;
 using MuninTransactionalStorage  = Raven.Storage.Managed.TransactionalStorage;
 using Xunit;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace Raven.Tests.Storage
 			IOExtensions.DeleteDirectory("Test");
 		}
 
-		[Fact]
+		/*[Fact]
 		public void Esent_when_there_are_multiple_map_results_for_multiple_indexes()
 		{
 			using(var transactionalStorage = new EsentTransactionalStorage(new RavenConfiguration
@@ -30,7 +30,7 @@ namespace Raven.Tests.Storage
 				when_there_are_multiple_map_results_for_multiple_indexes(transactionalStorage);
 			}
 
-		}
+		}*/
 
 
 		[Fact]
@@ -75,7 +75,7 @@ namespace Raven.Tests.Storage
 			});
 		}
 
-		[Fact]
+		/*[Fact]
 		public void Esent_when_there_are_multiple_map_results_and_we_ask_for_results()
 		{
 			using (var transactionalStorage = new EsentTransactionalStorage(new RavenConfiguration
@@ -86,7 +86,7 @@ namespace Raven.Tests.Storage
 				when_there_are_multiple_map_results_and_we_ask_for_results(transactionalStorage);
 			}
 
-		}
+		}*/
 
 
 		[Fact]
@@ -127,7 +127,7 @@ namespace Raven.Tests.Storage
 			});
 		}
 
-		[Fact]
+		/*[Fact]
 		public void Esent_when_there_are_updates_to_map_reduce_results()
 		{
 			using (var transactionalStorage = new EsentTransactionalStorage(new RavenConfiguration
@@ -138,7 +138,7 @@ namespace Raven.Tests.Storage
 				when_there_are_updates_to_map_reduce_results(transactionalStorage);
 			}
 
-		}
+		}*/
 
 
 		[Fact]
