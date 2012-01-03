@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Linq;
@@ -29,6 +30,7 @@ using Raven.Database.Server.Abstractions;
 using Raven.Database.Server.Security;
 using Raven.Database.Server.Security.OAuth;
 using Raven.Database.Server.Security.Windows;
+using Raven.Database.Server.Security.NoAuth;
 
 namespace Raven.Database.Server
 {
@@ -107,8 +109,27 @@ namespace Raven.Database.Server
 				val = 60;
 			frequnecyToCheckForIdleDatabases = TimeSpan.FromSeconds(val);
 
-			configuration.Container.SatisfyImportsOnce(this);
-
+			//configuration.Container.SatisfyImportsOnce(this);
+			if(RequestResponders == null)
+            {
+                RequestResponders = new OrderedPartCollection<AbstractRequestResponder>();
+                
+                Assembly a = Assembly.GetAssembly(this.GetType());
+                Type[] types = a.GetTypes();
+                
+                var query = from t in types
+                    where (t.BaseType == typeof(AbstractRequestResponder)
+						||t.BaseType == typeof(Raven.Database.Server.Responders.RequestResponder)) 
+						&& t != typeof(Raven.Database.Server.Responders.RequestResponder)
+                                select t;
+                foreach( Type t in query)
+                {
+                    //Console.WriteLine("Adding {0}",t);
+                    RequestResponders.Add(
+						t.GetConstructor(Type.EmptyTypes).Invoke(new object[]{})
+						as AbstractRequestResponder);
+                }
+            }
 			foreach (var responder in RequestResponders)
 			{
 				responder.Value.Initialize(() => currentDatabase.Value, () => currentConfiguration.Value, () => currentTenantId.Value, this);
@@ -122,9 +143,12 @@ namespace Raven.Database.Server
 				case "oauth":
 					requestAuthorizer = new OAuthRequestAuthorizer();
 					break;
+				case "noauth":
+					requestAuthorizer = new NoAuthRequestAuthorizer();
+					break;
 				default:
 					throw new InvalidOperationException(
-						string.Format("Unknown AuthenticationMode {0}. Options are Windows and OAuth", configuration.AuthenticationMode));
+						string.Format("Unknown AuthenticationMode {0}. Options are Windows, OAuth, and NoAuth", configuration.AuthenticationMode));
 			}
 
 			requestAuthorizer.Initialize(() => currentDatabase.Value, () => currentConfiguration.Value, () => currentTenantId.Value, this);
@@ -171,6 +195,26 @@ namespace Raven.Database.Server
 			if (virtualDirectory.EndsWith("/") == false)
 				virtualDirectory = virtualDirectory + "/";
 			listener.Prefixes.Add("http://" + (DefaultConfiguration.HostName ?? "+") + ":" + DefaultConfiguration.Port + virtualDirectory);
+			
+			if(ConfigureHttpListeners == null)
+            {
+                ConfigureHttpListeners = new OrderedPartCollection<IConfigureHttpListener>();
+                
+                Assembly a = Assembly.GetAssembly(this.GetType());
+                Type[] types = a.GetTypes();
+                
+                var query = from t in types
+                    where typeof(IConfigureHttpListener).IsAssignableFrom(t) == true 
+						&& t != typeof(IConfigureHttpListener)
+                        	select t;
+                foreach( Type t in query)
+                {
+                    //Console.WriteLine("Adding {0}",t);
+                    ConfigureHttpListeners.Add(
+						t.GetConstructor(Type.EmptyTypes).Invoke(new object[]{})
+						as IConfigureHttpListener);
+                }
+            }
 
 			foreach (var configureHttpListener in ConfigureHttpListeners)
 			{

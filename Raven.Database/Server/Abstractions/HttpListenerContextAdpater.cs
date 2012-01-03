@@ -84,11 +84,14 @@ namespace Raven.Database.Server.Abstractions
 			try
 			{
 				ResponseInternal.OutputStream.Flush();
-				ResponseInternal.OutputStream.Dispose(); // this is required when using compressing stream
-				ctx.Response.Close();
 			}
 			catch
 			{
+			}
+			finally
+			{
+				ResponseInternal.OutputStream.Dispose(); // this is required when using compressing stream
+				ctx.Response.Close();
 			}
 		}
 
