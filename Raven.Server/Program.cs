@@ -330,9 +330,11 @@ Configuration options:
 				Action value;
 				if(actions.TryGetValue(readLine, out value) == false)
 				{
-					Console.WriteLine("Could not understand: {0}", readLine);
-					WriteInteractiveOptions(actions);
 					continue;
+					// MonoDevelop Application Output view fix
+					/*Console.WriteLine("Could not understand: {0}", readLine);
+					WriteInteractiveOptions(actions);
+					continue;*/
 				}
 
 				value();
