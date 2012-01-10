@@ -109,27 +109,8 @@ namespace Raven.Database.Server
 				val = 60;
 			frequnecyToCheckForIdleDatabases = TimeSpan.FromSeconds(val);
 
-			//configuration.Container.SatisfyImportsOnce(this);
-			if(RequestResponders == null)
-            {
-                RequestResponders = new OrderedPartCollection<AbstractRequestResponder>();
-                
-                Assembly a = Assembly.GetAssembly(this.GetType());
-                Type[] types = a.GetTypes();
-                
-                var query = from t in types
-                    where (t.BaseType == typeof(AbstractRequestResponder)
-						||t.BaseType == typeof(Raven.Database.Server.Responders.RequestResponder)) 
-						&& t != typeof(Raven.Database.Server.Responders.RequestResponder)
-                                select t;
-                foreach( Type t in query)
-                {
-                    //Console.WriteLine("Adding {0}",t);
-                    RequestResponders.Add(
-						t.GetConstructor(Type.EmptyTypes).Invoke(new object[]{})
-						as AbstractRequestResponder);
-                }
-            }
+			configuration.Container.SatisfyImportsOnce(this);
+			
 			foreach (var responder in RequestResponders)
 			{
 				responder.Value.Initialize(() => currentDatabase.Value, () => currentConfiguration.Value, () => currentTenantId.Value, this);
@@ -196,26 +177,6 @@ namespace Raven.Database.Server
 				virtualDirectory = virtualDirectory + "/";
 			listener.Prefixes.Add("http://" + (DefaultConfiguration.HostName ?? "+") + ":" + DefaultConfiguration.Port + virtualDirectory);
 			
-			if(ConfigureHttpListeners == null)
-            {
-                ConfigureHttpListeners = new OrderedPartCollection<IConfigureHttpListener>();
-                
-                Assembly a = Assembly.GetAssembly(this.GetType());
-                Type[] types = a.GetTypes();
-                
-                var query = from t in types
-                    where typeof(IConfigureHttpListener).IsAssignableFrom(t) == true 
-						&& t != typeof(IConfigureHttpListener)
-                        	select t;
-                foreach( Type t in query)
-                {
-                    //Console.WriteLine("Adding {0}",t);
-                    ConfigureHttpListeners.Add(
-						t.GetConstructor(Type.EmptyTypes).Invoke(new object[]{})
-						as IConfigureHttpListener);
-                }
-            }
-
 			foreach (var configureHttpListener in ConfigureHttpListeners)
 			{
 				configureHttpListener.Value.Configure(listener, DefaultConfiguration);
